@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 void main(List<String> arguments) async {
     var input = stdin.transform(utf8.decoder).transform(LineSplitter());
@@ -13,36 +13,35 @@ void main(List<String> arguments) async {
 }
 
 dynamic process(Reader input) async {
-  var txa = await input.nextInt();
-  var tya = await input.nextInt();
-  var txb = await input.nextInt();
-  var tyb = await input.nextInt();
-  var t = await input.nextInt();
-  var v = await input.nextInt();
   var n = await input.nextInt();
-  
-  var xx = List.filled(n, 0);
-  var yy = List.filled(n, 0);
-  for(int i=0; i<n; i++){
-    var x = await input.nextInt();
-    var y = await input.nextInt();
-    xx[i] = x;
-    yy[i] = y;
-  }
+  var aa = await input.takeInt(n).toList();
 
-  double diff(int x1, int y1, int x2, int y2){
-    return Math.sqrt( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) );
-  }
+  var win = true;
+  var sum = aa[0];
+  var hash = <int>{};
+  hash.add(aa[0]);
 
-  for(int i=0; i<n; i++){
-    var sum = diff(txa, tya, xx[i], yy[i])
-      + diff(xx[i], yy[i], txb, tyb);
-    if(sum <= (v * t)){
-      return "YES";
+  for(int i=1; i<n; i++){
+    var a = aa[i];
+    sum = sum ^ a;
+    hash.add(a);
+    if(sum == 0){
+      win = false;
+    }else if(win){
+      if(hash.contains(sum)){
+        win = true;
+      }else{
+        win = false;
+      }
+    }else{
+      win = true;
     }
   }
-  return "NO";
+
+  return win ? "Win" : "Lose";
 }
+
+//----------
 
 class Reader{
   var queue = Queue<String>();
@@ -52,6 +51,7 @@ class Reader{
   Reader(Stream<String> stream){
     subscription = stream.listen((x) {
       queue.addAll(x.split(" "));
+      //queue.add(x);
       check();
     });
   }
@@ -77,6 +77,10 @@ class Reader{
     for(int i=0; i<count; i++){
         yield await next();
     }
+  }
+
+  Stream<int> takeInt(int count) async*{
+    yield* take(count).map(int.parse);
   }
 
   void exit(){
